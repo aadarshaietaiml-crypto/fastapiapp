@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from routers import company
 from routers import job
 from database import engine,Base
+from models import company as company_model, job as job_model
 
 app=FastAPI()
 print(engine)
