@@ -4,7 +4,6 @@ class ChatRequest(BaseModel):
     message: str
     session_id: str = "default"
 
-
 class ChatResponse(BaseModel):
-    response:str
-    
+    reply: str
+    session_id: str
