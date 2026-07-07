@@ -1,14 +1,16 @@
 from fastapi import APIRouter
-
 from schemas.chat import ChatRequest, ChatResponse
-from Services.langchain_service import get_chat_response
+from Services.langchain_service import ask_career_chatbot_response
 
-router = APIRouter(prefix="/chat", tags=["chat"])
+router = APIRouter(prefix="/chat",tags=["Chat"])
+
+# @router.post("/ask",response_model=ChatResponse)    
+# def chat_ask(request:ChatRequest):
+#     ans = llm_response(request.message)
+#     return ChatResponse(response=ans)
 
 
-@router.post("/", response_model=ChatResponse)
-def chat_with_ai(request: ChatRequest):
-    print(f"Received chat request: Session ID: {request.session_id}, User Message: {request.message}")
-    reply = get_chat_response(request.message, session_id=request.session_id)
-    print(f"Session ID: {request.session_id}, User Message: {request.message}, AI Reply: {reply}")
-    return ChatResponse(reply=reply, session_id=request.session_id)
+@router.post("/ask_career",response_model=ChatResponse)
+def ask_career_chatbot(request:ChatRequest):
+    ans = ask_career_chatbot_response(request.message, request.session_id)
+    return ChatResponse(response=ans)   

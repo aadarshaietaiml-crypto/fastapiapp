@@ -1,67 +1,67 @@
 import os
-from typing import Dict
-
+from typing import Dict, List
 from dotenv import load_dotenv
 
-from langchain_groq import ChatGroq
+from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableWithMessageHistory
-from langchain_community.chat_message_histories import ChatMessageHistory
-
-load_dotenv()
+from langchain_groq import ChatGroq
 
 API_KEY = os.getenv("API_KEY")
+LLAMA_MODEL = "llama-3.3-70b-versatile"
 
-if not API_KEY:
-    raise Exception("API_KEY not found in .env file")
+llm = ChatGroq(model=LLAMA_MODEL, groq_api_key=API_KEY)
 
-MODEL_NAME = "llama-3.3-70b-versatile"
 
-llm = ChatGroq(
-    model=MODEL_NAME,
-    groq_api_key=API_KEY,
-)
+def chat_without_memory(query: str) -> str:
+    response = llm.invoke(query)
+    return response.content
 
-prompt = ChatPromptTemplate.from_messages(
+
+conversation: List[HumanMessage | AIMessage] = []
+
+
+def chat_with_memory(user_query: str) -> str:
+    conversation.append(HumanMessage(content=user_query))
+    response = llm.invoke(conversation)
+    conversation.append(AIMessage(content=response.content))
+    return response.content
+
+
+prompt_with_memory = ChatPromptTemplate.from_messages(
     [
-        ("system", "You are TalentSpark AI. Help users with jobs, careers, interviews and programming."),
+        ("system", "You are a helpful assistant."),
         ("placeholder", "{chat_history}"),
         ("human", "{user_query}"),
     ]
 )
 
-chain = prompt | llm
+chain_with_memory = prompt_with_memory | llm
 
 store: Dict[str, ChatMessageHistory] = {}
 
 
-def get_history(session_id: str):
+def get_history(session_id: str) -> ChatMessageHistory:
     if session_id not in store:
         store[session_id] = ChatMessageHistory()
     return store[session_id]
 
 
-chat_chain = RunnableWithMessageHistory(
-    runnable=chain,
+chat_with_memory_chain = RunnableWithMessageHistory(
+    runnable=chain_with_memory,
     get_session_history=get_history,
     input_messages_key="user_query",
-    history_messages_key="chat_history",
+    message_history_key="chat_history",
 )
 
 
-def get_chat_response(user_query: str, session_id: str = "default"):
-    try:
-        response = chat_chain.invoke(
-            {"user_query": user_query},
-            config={
-                "configurable": {
-                    "session_id": session_id
-                }
-            },
-        )
-
-        return response.content
-
-    except Exception as e:
-        print("LANGCHAIN ERROR:", e)
-        return f"Error: {str(e)}"
+def get_chat_response(user_query: str, session_id: str = "default") -> str:
+    print(f"Session ID: {session_id}, User Query: {user_query}")
+    response = chat_with_memory_chain.invoke(
+        {"user_query": user_query},
+        {"configurable": {"session_id": session_id}},
+    )
+    return response.content
+def ask_career_chatbot_response(user_query: str, session_id: str = "default"):
+    return get_chat_response(user_query, session_id)

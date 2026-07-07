@@ -9,8 +9,7 @@ interface ChatRequest {
 }
 
 interface ChatResponse {
-    reply: string;
-    session_id: string;
+    response: string;
 }
 
-export type { ChatMessage, ChatRequest, ChatResponse };
+export type { ChatMessage, ChatRequest, ChatResponse }
