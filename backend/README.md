@@ -133,3 +133,18 @@ verify_access_token() - for decoding access token with
 1.login --> create access token
 2.access token --> get current user
 3.current user --> get role --> role_required --> access protected resources
+
+# Before Deployment checklist
+.env configured
+on startup create all tables in db
+async await in every api and function and session handling for all apis
+exception handling for all apis ->
+1.resource not found
+2.internal server error
+3.bad request
+4.unauthorized
+5.forbidden
+6.validation error 
+7.email already exists
+8.password incorrect
+9.company not found
