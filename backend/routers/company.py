@@ -76,4 +76,3 @@ async def delete_company(company_id: int,db:AsyncSession=Depends(get_db),current
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error deleting company: {str(e)}")
-
